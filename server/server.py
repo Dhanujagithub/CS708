@@ -239,7 +239,7 @@ def finalize_chunked_upload():
                     image_data = base64.b64decode(combined_data)
                     
                     # Save to file
-                    file_path = f"./images/image/scene0.jpg"  # Use appropriate extension
+                    file_path = f"./images/image/scene_environment.png"  # Use appropriate extension
                     with open(file_path, 'wb') as file:
                         file.write(image_data)
                         
@@ -372,4 +372,4 @@ if __name__ == "__main__":
     # Increase the maximum request size (in bytes)
     app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB
     
-    app.run(host='192.168.10.126', port=5000)
+    app.run(host='0.0.0.0', port=5000)
