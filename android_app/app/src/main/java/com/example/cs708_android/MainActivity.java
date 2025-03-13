@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONArray;
 
 import java.io.File;
@@ -43,6 +43,8 @@ import java.io.InputStream;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+
+    private TextInputEditText command;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
         String commandText= "chair";
         ImageView imageView = findViewById(R.id.imageView);
-        String env_instance = "0";
+        String env_instance = "2";
         try {
             // Load image from assets folder
             InputStream inputStream = getAssets().open("data/image/depthimage"+env_instance+".png");
@@ -107,13 +109,46 @@ public class MainActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
-        Button myButton = findViewById(R.id.button);
-        myButton.setOnClickListener(new View.OnClickListener() {
+        Button Send_data = findViewById(R.id.button);
+        //implement the function to send data to the server
+        Send_data.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
+
+        Button Reset = findViewById(R.id.button2);
+        //implement the function to reset bbox and width display from the current screen
+        Reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        Button Previous = findViewById(R.id.btnPrev);
+        //implement the function to go to previous scene environment
+        Reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        Button Next = findViewById(R.id.btnNext);
+        //implement the function to go to next scene environment
+        Reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        command = findViewById(R.id.input);
+
+        // Example: Get the text from the input field
+        String widthText = command.getText().toString();
     }
 
     public void selectTargetScreenArea(String response){
