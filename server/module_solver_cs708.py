@@ -1,21 +1,18 @@
-import torch
-import numpy as np
 import argparse
-import random
 import os
-import torch.backends.cudnn as cudnn
-import cv2
-from pre_processing import *
-import cv2
+import random
 
+import cv2
+import numpy as np
+import torch
+import torch.backends.cudnn as cudnn
+
+from pre_processing import *
 from yolact.yolact import Yolact
+from yolact.eval import evaluate_image
 from to_implement import *
 
-
 cuda_en=0
-
-  
-from yolact.eval import evaluate_image
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device",device)
 
@@ -26,6 +23,7 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         description='YOLACT COCO Evaluation')
@@ -106,7 +104,6 @@ def parse_args(argv=None):
     parser.set_defaults(no_bar=False, display=False, resume=False, output_coco_json=False, output_web_json=False, shuffle=False,
                         benchmark=False, no_sort=False, no_hash=False, mask_proto_debug=False, crop=True, detect=False, display_fps=False,
                         emulate_playback=False)
-
     global args
     args = parser.parse_args(argv)
 
@@ -116,20 +113,20 @@ def parse_args(argv=None):
     if args.seed is not None:
         random.seed(args.seed)
 
-
 def init_seg_model():
     with torch.no_grad():
         if not os.path.exists('results'):
             os.makedirs('results')
+        
         if cuda_en:
             cudnn.fastest = True
             torch.set_default_tensor_type('torch.cuda.FloatTensor')
         else:
             torch.set_default_tensor_type('torch.FloatTensor')
+        
         print('Loading model...', end='')
         net = Yolact()
         net.load_weights('./yolact/weights/yolact_base_54_800000.pth')
-        #net = torch.load("./yolact/weights/yolact_base_54_800000.pth", map_location=torch.device('cpu'))
         net.eval()
         print(' Done.')
         return net    
@@ -142,16 +139,12 @@ def segmentor(image):
        _,mask,predictions,_=evaluate_image(net,image,args)
   return mask,predictions
 
-
-
-
 def module_sol(net):
     parse_args()
     cwd = os.getcwd()
     instance=0
     
     command=load_command(instance) #this function load the verbal instruction from the user.
-    
     
     #current processing environment instance
     image_path=cwd+'/images/image/scene_environment.png'
@@ -160,45 +153,32 @@ def module_sol(net):
     image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
     image = cv2.resize(image, (550,550), interpolation = cv2.INTER_AREA) # resize the image width= 1440 and height= 1920
 
-
-
     #generate depth image
     depth_image_path='./images/depth/depth'+str(instance)+'.txt'
     depth_image=depth_image_generation(depth_image_path)
     depth_image = cv2.resize(depth_image, (550,550), interpolation = cv2.INTER_AREA)
 
-
     # Translation Matrix genertation
     matrix_path='./images/trans_matrix/matrix'+str(instance)+'.txt'
     t_matrx = translate_matrix_genertion(matrix_path)
-
 
     #Intrinsic camera matrix generation
     in_matrix_path='./images/intric_matrix/matrix'+str(instance)+'.txt'
     intrinsic_matrx= intric_matrix_genertion(in_matrix_path)
     
-
-
     obj_class= class_type_resolver_fromtext(command)
 
     mask,predictions=segmentor(image)
-
-    #cv2.imwrite('output.png',mask[0,:,:])
-    #cv2.waitKey(0)
     
     x1,y1,z1,V = pointing_direction_solver(mask,predictions,depth_image,t_matrx,intrinsic_matrx)
     line=[x1,y1,z1,V]
+    
     target_point_cloud = advanced_target_resolver(line,obj_class,mask,predictions,depth_image,t_matrx,intrinsic_matrx)
     
+    width_dimension = module_dimension(target_point_cloud)
     
-    width_dimension = module_dimention(target_point_cloud)
-    
-    width_dimension=50 # width in cm
     print('object width is ',width_dimension)
     return [[5,6,5,6],width_dimension]
-
-
-
 
 if __name__ == "__main__":
     net=init_seg_model()

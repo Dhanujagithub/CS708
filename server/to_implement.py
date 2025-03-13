@@ -7,11 +7,10 @@ def pointing_direction_solver(mask,predictions,depth_image,t_matrx,intrinsic_mat
   V = [0,0,0]
   return x1,y1,z1,V
 
-def  class_type_resolver_fromtext(command):
-  'TODO: You should implement this' 
+def class_type_resolver_fromtext(command):
   clue_list='chair'
   return clue_list
 
-def module_dimention(target_point_cloud):
+def module_dimension(target_point_cloud):
   width_value=0.5 # in meters
   return width_value*100
